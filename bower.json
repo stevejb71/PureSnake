@@ -1,0 +1,25 @@
+{
+  "name": "PureSnake",
+  "version": "0.0.0",
+  "authors": [
+    "Steve <stevejb71@yahoo.co.uk>"
+  ],
+  "description": "Snake game in Purescript",
+  "keywords": [
+    "game",
+    "snake",
+    "purescript"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "purescript-arrays": "~0.1.8"
+  }
+}
