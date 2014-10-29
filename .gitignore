@@ -1,5 +1,5 @@
 .psci_modules
-output/
+gen/
 bower_components/
 node_modules/
 .psci
