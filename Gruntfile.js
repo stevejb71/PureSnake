@@ -7,7 +7,7 @@ module.exports = function(grunt) {
             options : {
             },
             build : {
-                src: ["src/purs/Snake.purs"],
+                src: ["src/purs/*.purs"],
                 dest: "gen/Snake.js"
             }
         },

@@ -1,3 +1,7 @@
 module Snake where
 
-startSnake = "hi"
+import Canvas
+
+startSnake = do
+    ctx <- canvasContext "canvas"
+    drawRect ctx
