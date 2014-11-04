@@ -11,25 +11,41 @@ type CanvasEff a = forall e. Eff (canvas :: Canvas | e) a
 
 type Position = {x :: Number, y :: Number}
 
+showPosition :: Position -> String
+showPosition {x = x, y = y} = "(" ++ (show x) ++ "," ++ (show y) ++ ")"
+
 type Board = {size :: Number, squares :: Number}
 board = {size: 500, squares: 50}
 
-data Direction = N | W | S | E
+data Direction = N | W | S | E 
 
-data Snake = Snake Direction [Position]
+instance showDirection :: Show Direction where
+    show d = case d of 
+        N -> "N"
+        W -> "W"
+        S -> "S"
+        E -> "E"
+
+data Snake = Snake Direction [Position] 
+
+instance showSnake :: Show Snake where
+    show (Snake d ps) = "Snake " ++ (show d) ++ " " ++ show (map showPosition ps)
+
+snakeTail (Snake _ ps) = Data.Array.Unsafe.last ps
+
 starterSnake = Snake S [{x:5,y:5},{x:6,y:5},{x:6,y:6}]
 
 changeDirection :: Direction -> Snake -> Snake
 changeDirection d' (Snake _ ps) = Snake d' ps
 
-moveSnake :: Board -> Snake -> Snake
-moveSnake b (Snake d (p:ps)) = 
+moveSnake :: Snake -> Snake
+moveSnake (Snake d l@(p:ps)) = 
     let p' = case d of 
                 N -> {x:p.x, y:p.y-1}
                 S -> {x:p.x, y:p.y+1}
                 W -> {x:p.x-1, y:p.y}
                 E -> {x:p.x+1, y:p.y}
-    in Snake d (p':(pop ps)) 
+    in Snake d (p':(pop l)) 
 
 toView :: Board -> Position -> Rectangle
 toView b p = let sqSize = b.size / b.squares in {h:sqSize, w:sqSize, y:p.y*sqSize, x:p.x*sqSize}
@@ -47,6 +63,8 @@ mkLoop = do
 loop :: Context2D -> RefVal Snake -> Eff (canvas :: Canvas, ref :: Ref) Unit
 loop ctx sr = do
     s <- readRef sr
-    _ <- drawSnake ctx (toView board) s
-    _ <- writeRef sr $ moveSnake board s
+    _ <- clearRect ctx $ (toView board) (snakeTail s)
+    let s' = moveSnake s
+    _ <- drawSnake ctx (toView board) s'
+    _ <- writeRef sr s'
     return unit
