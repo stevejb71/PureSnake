@@ -3,10 +3,11 @@
     <title>Pure Snake</title>
     <link rel="stylesheet" type="text/css" href="snake.css">
     <script src='../../bower_components/jquery/dist/jquery.min.js'></script>
+    <script src='../../bower_components/jquery/dist/jquery.min.js'></script>
     <script src='../../gen/Snake.js'></script>
     <script>
       $(document).ready(function(){
-        PS.Snake.startSnake();
+        window.setInterval(PS.Snake.loop, 100);
       });
     </script>  
   </head>

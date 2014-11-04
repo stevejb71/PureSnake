@@ -22,6 +22,7 @@
   "dependencies": {
     "jquery": "~2.1.1",
     "purescript-canvas": "*",
-    "purescript-foldable-traversable": "*"
+    "purescript-foldable-traversable": "*",
+    "purescript-refs": "*"
   }
 }
