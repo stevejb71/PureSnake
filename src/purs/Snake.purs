@@ -5,7 +5,7 @@ import Control.Monad.Eff
 import Graphics.Canvas
 import Data.Foldable
 import Control.Monad.Eff.Ref
-import Data.Array
+import Data.Array.NonEmpty
 
 type CanvasEff a = forall e. Eff (canvas :: Canvas | e) a
 
@@ -26,26 +26,26 @@ instance showDirection :: Show Direction where
         S -> "S"
         E -> "E"
 
-data Snake = Snake Direction [Position] 
+data Snake = Snake Direction (NonEmpty Position) 
 
 instance showSnake :: Show Snake where
     show (Snake d ps) = "Snake " ++ (show d) ++ " " ++ show (map showPosition ps)
 
-snakeTail (Snake _ ps) = Data.Array.Unsafe.last ps
+snakeTail (Snake _ ps) = last ps
 
-starterSnake = Snake S [{x:5,y:5},{x:6,y:5},{x:6,y:6}]
+starterSnake = Snake S ({x:5,y:5} :| [{x:6,y:5},{x:6,y:6}])
 
 changeDirection :: Direction -> Snake -> Snake
 changeDirection d' (Snake _ ps) = Snake d' ps
 
 moveSnake :: Snake -> Snake
-moveSnake (Snake d l@(p:ps)) = 
+moveSnake (Snake d l@(NonEmpty p ps)) = 
     let p' = case d of 
                 N -> {x:p.x, y:p.y-1}
                 S -> {x:p.x, y:p.y+1}
                 W -> {x:p.x-1, y:p.y}
                 E -> {x:p.x+1, y:p.y}
-    in Snake d (p':(pop l)) 
+    in Snake d (p' :| (pop l)) 
 
 toView :: Board -> Position -> Rectangle
 toView b p = let sqSize = b.size / b.squares in {h:sqSize, w:sqSize, y:p.y*sqSize, x:p.x*sqSize}

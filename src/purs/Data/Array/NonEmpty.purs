@@ -2,6 +2,8 @@ module Data.Array.NonEmpty where
 
 import qualified Data.Array as A
 import qualified Data.Array.Unsafe as AU
+import Data.Foldable
+import Data.Maybe
 
 data NonEmpty a = NonEmpty a [a]
 
@@ -14,6 +16,11 @@ instance eqNonEmpty :: (Eq a) => Eq (NonEmpty a) where
 
 instance functorNonEmpty :: Functor NonEmpty where
     (<$>) f as = map f as
+
+instance foldableNonEmpty :: Foldable NonEmpty where
+  foldr f b as = foldr f b (toArray as)
+  foldl f b as = foldl f b (toArray as)
+  foldMap f as = foldMap f (toArray as)
 
 infix 5 :|
 (:|) :: forall a. a -> [a] -> NonEmpty a
@@ -31,6 +38,9 @@ tail (NonEmpty _ as) = as
 last :: forall a. NonEmpty a -> a
 last (NonEmpty a []) = a
 last (NonEmpty _ as) = AU.last as
+
+pop :: forall a. NonEmpty a -> [a]
+pop (NonEmpty a as) = a : (pop_ as)
 
 (<|) :: forall a. a -> NonEmpty a -> NonEmpty a
 (<|) a as = a :| toArray as
@@ -50,3 +60,23 @@ map f (NonEmpty a as) = f a :| (A.map f as)
 
 filter :: forall a. (a -> Boolean) -> NonEmpty a -> [a]
 filter p as = A.filter p (toArray as)
+
+singleton :: forall a. a -> NonEmpty a
+singleton a = NonEmpty a []
+
+nub :: forall a. (Eq a) => NonEmpty a -> [a]
+nub as = A.nub (toArray as)
+
+infixl 8 !!
+
+(!!) :: forall a. NonEmpty a -> Number -> Maybe a
+(!!) (NonEmpty a _) 0 = Just a 
+(!!) (NonEmpty _ as) n = A.(!!) as (n-1)
+
+foreign import pop_
+  "function pop_(l) {\
+  \  if(l.length == 0) return l;\
+  \  var l1 = l.slice();\
+  \  l1.pop(); \
+  \  return l1;\
+  \}" :: forall a. [a] -> [a]
