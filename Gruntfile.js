@@ -4,13 +4,13 @@ module.exports = function(grunt) {
     grunt.initConfig({
         clean: ["gen"],
         dotPsci: {
-            src: ["src/purs/*.purs", "bower_components/**/src/**/*.purs"]
+            src: ["src/purs/**/*.purs", "bower_components/**/src/**/*.purs"]
         },         
         psc: {
             options : {
             },
             build : {
-                src: ["src/purs/*.purs", "bower_components/**/src/**/*.purs"],
+                src: ["src/purs/**/*.purs", "bower_components/**/src/**/*.purs"],
                 dest: "gen/Snake.js"
             }
         },
