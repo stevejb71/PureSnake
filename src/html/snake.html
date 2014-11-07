@@ -7,6 +7,9 @@
     <script src='../../gen/Snake.js'></script>
     <script>
       $(document).ready(function(){
+        var canvas = document.getElementsByTagName('canvas')[0];
+        canvas.width  = 800;
+        canvas.height = 800;        
         var global = {keyCodes: []};
         $('body').keydown(function(e) {
           global.keyCodes.push(e.keyCode);
@@ -15,8 +18,11 @@
       });
       function repeatWithWait(f, initialParam, delayMs, global) {
         var call = function() {
-          f.snake = f(global.keyCodes.pop())(f.snake)();
-          window.setTimeout(call, delayMs);
+          var result = f(global.keyCodes.pop())(f.snake)();
+          f.snake = result.snake;
+          if(!result.crashed) {
+            window.setTimeout(call, delayMs);
+          }
         }
         f.snake = initialParam;
         call();
@@ -28,7 +34,7 @@
         <h1>Snake</h1>
     </div>
     <div>
-      <canvas id="canvas">
+      <canvas id="canvas" width="640" height="480">
     </div>
   </body>
 </html>

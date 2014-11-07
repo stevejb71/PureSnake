@@ -16,8 +16,7 @@ type KeyCode = Number
 showPosition :: Position -> String
 showPosition {x = x, y = y} = "(" ++ (show x) ++ "," ++ (show y) ++ ")"
 
-type Board = {size :: Number, squares :: Number}
-board = {size: 500, squares: 50}
+type Board = {w :: Number, h :: Number, squares :: Number}
 
 data Direction = N | W | S | E 
 
@@ -33,8 +32,14 @@ data Snake = Snake Direction (NonEmpty Position)
 instance showSnake :: Show Snake where
     show (Snake d body) = "Snake " ++ (show d) ++ " " ++ show (map showPosition body)
 
+snakeTail :: Snake -> Position
+snakeTail (Snake _ body) = last body
+
+isSnakeOutsideBoard :: Board -> Snake -> Boolean
+isSnakeOutsideBoard b (Snake _ (NonEmpty {x=x,y=y} _)) = x < 0 || y < 0 || x > b.w || y > b.h  
+
 starterSnake :: Snake
-starterSnake = Snake S ({x:5,y:5} :| [{x:6,y:5},{x:6,y:6}])
+starterSnake = Snake S ({x:5,y:5} :| [{x:6,y:5}])
 
 changeDirection :: Direction -> Snake -> Snake
 changeDirection d' (Snake _ ps) = Snake d' ps
@@ -49,7 +54,9 @@ moveSnake d (Snake _ l@(NonEmpty p ps)) =
     in Snake d (p' :| (pop l)) 
 
 toView :: Board -> Position -> Rectangle
-toView b p = let sqSize = b.size / b.squares in {h:sqSize, w:sqSize, y:p.y*sqSize, x:p.x*sqSize}
+toView b p = { h: sqHeight, w: sqWidth, x: p.x * sqWidth, y: p.y * sqHeight }
+    where sqWidth = b.w / b.squares 
+          sqHeight = b.h / b.squares 
 
 drawSnake :: forall e. Context2D -> (Position -> Rectangle) -> Snake -> Eff (canvas :: Canvas | e) Unit
 drawSnake ctx tr (Snake _ ps) = for_ (map tr ps) $ fillRect ctx
@@ -63,17 +70,19 @@ keyToDirection k =
         38 -> Just N
         _ -> Nothing
 
-mkLoop :: Eff (canvas :: Canvas) (KeyCode -> Snake -> Eff (canvas :: Canvas) Snake)
+type Result = {snake :: Snake, crashed :: Boolean}
+
+mkLoop :: Eff (canvas :: Canvas) (KeyCode -> Snake -> Eff (canvas :: Canvas) Result)
 mkLoop = do
     canvas <- getCanvasElementById "canvas"
     ctx <- getContext2D canvas
-    return $ loop ctx
+    let board = {w: 800, h: 800, squares: 40}
+    return $ loop board ctx
 
-loop :: Context2D -> KeyCode -> Snake -> Eff (canvas :: Canvas) Snake
-loop ctx keyCode s@(Snake d body) = do
+loop :: Board -> Context2D -> KeyCode -> Snake -> Eff (canvas :: Canvas) Result
+loop board ctx keyCode s@(Snake d body) = do
     _ <- clearRect ctx $ (toView board) (snakeTail s)
     let d' = fromMaybe d (keyToDirection keyCode)
     let s' = moveSnake d' s
     _ <- drawSnake ctx (toView board) s'
-    return s'
-    where snakeTail (Snake _ body) = last body
+    return $ {snake: s', crashed: (isSnakeOutsideBoard board s)}

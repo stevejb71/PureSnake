@@ -1,12 +1,12 @@
 #canvas {
     background-color:#eeeeee;
-    width: 640;
-    height: 480;
+    width: 600;
+    height: 600;
 }
 
 #title {
     font-style: italic;
     text-align: center;
-    width: 640;
+    width: 600;
     height: 40;
 }
