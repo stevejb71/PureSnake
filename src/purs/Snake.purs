@@ -4,7 +4,6 @@ import Base
 import Control.Monad.Eff
 import Graphics.Canvas
 import Data.Foldable
-import Control.Monad.Eff.Ref
 import Data.Array.NonEmpty
 
 type CanvasEff a = forall e. Eff (canvas :: Canvas | e) a
@@ -53,18 +52,15 @@ toView b p = let sqSize = b.size / b.squares in {h:sqSize, w:sqSize, y:p.y*sqSiz
 drawSnake :: forall e. Context2D -> (Position -> Rectangle) -> Snake -> Eff (canvas :: Canvas | e) Unit
 drawSnake ctx tr (Snake _ ps) = for_ (map tr ps) $ fillRect ctx
 
-mkLoop :: Eff (ref :: Ref, canvas :: Canvas) (Eff (ref :: Ref, canvas :: Canvas) Unit)
+mkLoop :: Eff (canvas :: Canvas) (Snake -> Eff (canvas :: Canvas) Snake)
 mkLoop = do
     canvas <- getCanvasElementById "canvas"
     ctx <- getContext2D canvas
-    sr <- newRef starterSnake
-    return $ loop ctx sr
+    return $ loop ctx
 
-loop :: Context2D -> RefVal Snake -> Eff (canvas :: Canvas, ref :: Ref) Unit
-loop ctx sr = do
-    s <- readRef sr
+loop :: Context2D -> Snake -> Eff (canvas :: Canvas) Snake
+loop ctx s = do
     _ <- clearRect ctx $ (toView board) (snakeTail s)
     let s' = moveSnake s
     _ <- drawSnake ctx (toView board) s'
-    _ <- writeRef sr s'
-    return unit
+    return s'

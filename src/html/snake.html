@@ -7,8 +7,11 @@
     <script src='../../gen/Snake.js'></script>
     <script>
       $(document).ready(function(){
-        // window.setInterval(PS.Snake.mkLoop(), 200);
-        repeatWithWait(test, 0, 2000);
+        var lp = PS.Snake.mkLoop();
+        var f = function(s) {
+          return lp(s)();
+        }
+        repeatWithWait(f, PS.Snake.starterSnake, 200);
       });
       function repeatWithWait(f, initialParam, delayMs) {
         var call = function() {
