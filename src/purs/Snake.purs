@@ -15,6 +15,9 @@ type Position = {x :: Number, y :: Number}
 
 type KeyCode = Number
 
+red = "rgb(200,10,10)"
+black = "rgb(0,0,0)"
+
 showPosition :: Position -> String
 showPosition {x = x, y = y} = "(" ++ (show x) ++ "," ++ (show y) ++ ")"
 
@@ -61,7 +64,20 @@ toView b p = { h: sqHeight, w: sqWidth, x: p.x * sqWidth, y: p.y * sqHeight }
           sqHeight = b.h / b.squares 
 
 drawSnake :: forall e. Context2D -> (Position -> Rectangle) -> Snake -> Eff (canvas :: Canvas | e) Unit
-drawSnake ctx tr (Snake _ ps) = for_ (map tr ps) $ fillRect ctx
+drawSnake ctx tr (Snake _ ps) = for_ (map tr ps) $ fillRectWithStyle ctx black
+
+drawApple :: Context2D -> Number -> (Position -> Rectangle) -> Eff (canvas :: Canvas, random :: Random) Unit
+drawApple ctx sz tr = do
+    pos <- chooseApplePosition sz
+    let rect = tr pos
+    _ <- fillRectWithStyle ctx red rect
+    return unit  
+
+fillRectWithStyle :: forall e. Context2D -> String -> Rectangle -> Eff (canvas :: Canvas | e) Unit
+fillRectWithStyle ctx style rect = do
+    _ <- setFillStyle style ctx
+    _ <- fillRect ctx rect
+    return unit  
 
 keyToDirection :: KeyCode -> Maybe Direction
 keyToDirection k = 
@@ -81,7 +97,7 @@ chooseApplePosition sz = do
 type ShowApple = Boolean
 
 shouldShowApple :: forall e. Eff (random :: Random | e) ShowApple
-shouldShowApple = (\x -> x < 0.125) <$> random
+shouldShowApple = (\x -> x < 0.05) <$> random
 
 type Result = {snake :: Snake, crashed :: Boolean, showApple :: ShowApple}
 
@@ -101,5 +117,6 @@ loop board ctx keyCode showApple s@(Snake d body) =
         else do
             _ <- clearRect ctx $ (toView board) (snakeTail s)
             _ <- drawSnake ctx (toView board) s'
-            showApple' <- shouldShowApple
-            return $ {snake: s', crashed: false, showApple: showApple' && not showApple}
+            showApple' <- if showApple then return true else shouldShowApple
+            _ <- if showApple' && (not showApple) then drawApple ctx board.squares (toView board) else (return unit)
+            return $ {snake: s', crashed: false, showApple: showApple'}
