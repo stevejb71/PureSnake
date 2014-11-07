@@ -11,11 +11,22 @@ instance showNonEmpty :: (Show a) => Show (NonEmpty a) where
     show (NonEmpty a as) = (show a) ++ " :| " ++ (show as)
 
 instance eqNonEmpty :: (Eq a) => Eq (NonEmpty a) where
-    (==) (NonEmpty l ls) (NonEmpty r rs) = l == r && ls == rs
-    (/=) l r = not (l == r)
+  (==) (NonEmpty l ls) (NonEmpty r rs) = l == r && ls == rs
+  (/=) l r = not (l == r)
 
 instance functorNonEmpty :: Functor NonEmpty where
-    (<$>) f as = map f as
+  (<$>) = map
+
+instance applyNonEmpty :: Apply NonEmpty where
+  (<*>) x y = fromArray_ $ (toArray x) <*> (toArray y)
+
+instance applicativeNonEmpty :: Applicative NonEmpty where
+  pure = singleton
+
+instance bindNonEmpty :: Bind NonEmpty where
+  (>>=) = flip concatMap
+
+instance monadNonEmpty :: Monad NonEmpty
 
 instance foldableNonEmpty :: Foldable NonEmpty where
   foldr f b as = foldr f b (toArray as)
@@ -66,6 +77,12 @@ singleton a = NonEmpty a []
 
 nub :: forall a. (Eq a) => NonEmpty a -> [a]
 nub as = A.nub (toArray as)
+
+concatMap :: forall a b. (a -> NonEmpty b) -> NonEmpty a -> NonEmpty b
+concatMap f as = fromArray_ $ A.concatMap g (toArray as)
+  where g a = toArray $ f a
+
+fromArray_ (a:as) = a :| as
 
 infixl 8 !!
 
