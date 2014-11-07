@@ -1,6 +1,6 @@
 module Data.Array.NonEmpty where
 
-import qualified Data.Array (append, drop, take, map, filter, nub, concatMap, (!!)) as A
+import qualified Data.Array (append, drop, take, map, filter, nub, concatMap, (!!), length) as A
 import qualified Data.Array.Unsafe (last) as AU
 import Data.Foldable (Foldable, foldr, foldl, foldMap)
 import Data.Maybe (Maybe(..))
@@ -42,6 +42,9 @@ infix 5 :|
 
 toArray :: forall a. NonEmpty a -> [a]
 toArray (NonEmpty a as) = a:as
+
+length :: forall a. NonEmpty a -> Number
+length (NonEmpty _ as) = 1 + A.length as
 
 head :: forall a. NonEmpty a -> a
 head (NonEmpty a _) = a
