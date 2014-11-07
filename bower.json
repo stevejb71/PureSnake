@@ -24,6 +24,7 @@
     "purescript-canvas": "*",
     "purescript-foldable-traversable": "*",
     "purescript-refs": "*",
-    "purescript-random": "*"
+    "purescript-random": "*",
+    "purescript-math": "*"
   }
 }
