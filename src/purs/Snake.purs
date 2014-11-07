@@ -31,10 +31,9 @@ instance showDirection :: Show Direction where
 data Snake = Snake Direction (NonEmpty Position) 
 
 instance showSnake :: Show Snake where
-    show (Snake d ps) = "Snake " ++ (show d) ++ " " ++ show (map showPosition ps)
+    show (Snake d body) = "Snake " ++ (show d) ++ " " ++ show (map showPosition body)
 
-snakeTail (Snake _ ps) = last ps
-
+starterSnake :: Snake
 starterSnake = Snake S ({x:5,y:5} :| [{x:6,y:5},{x:6,y:6}])
 
 changeDirection :: Direction -> Snake -> Snake
@@ -77,3 +76,4 @@ loop ctx keyCode s@(Snake d body) = do
     let s' = moveSnake d' s
     _ <- drawSnake ctx (toView board) s'
     return s'
+    where snakeTail (Snake _ body) = last body
