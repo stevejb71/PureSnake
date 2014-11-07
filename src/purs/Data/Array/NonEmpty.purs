@@ -1,9 +1,9 @@
 module Data.Array.NonEmpty where
 
-import qualified Data.Array as A
-import qualified Data.Array.Unsafe as AU
-import Data.Foldable
-import Data.Maybe
+import qualified Data.Array (drop, take, map, filter, nub, concatMap, (!!)) as A
+import qualified Data.Array.Unsafe (last) as AU
+import Data.Foldable (Foldable, foldr, foldl, foldMap)
+import Data.Maybe (Maybe(..))
 
 data NonEmpty a = NonEmpty a [a]
 
