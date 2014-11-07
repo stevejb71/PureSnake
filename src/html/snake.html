@@ -14,12 +14,13 @@
         $('body').keydown(function(e) {
           global.keyCodes.push(e.keyCode);
         });
-        repeatWithWait(PS.Snake.mkLoop(), PS.Snake.starterSnake, 200, global);
+        repeatWithWait(PS.Snake.mkLoop(), PS.Snake.starterSnake, 100, global);
       });
       function repeatWithWait(f, initialParam, delayMs, global) {
         var call = function() {
-          var result = f(global.keyCodes.pop())(f.snake)();
+          var result = f(global.keyCodes.pop())(f.showApple)(f.snake)();
           f.snake = result.snake;
+          f.showApple = result.showApple;
           if(!result.crashed) {
             window.setTimeout(call, delayMs);
           }

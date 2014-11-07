@@ -78,25 +78,28 @@ chooseApplePosition sz = do
     y <- randomN sz
     return $ {x:x, y:y}
 
-shouldShowApple :: forall e. Eff (random :: Random | e) Boolean
+type ShowApple = Boolean
+
+shouldShowApple :: forall e. Eff (random :: Random | e) ShowApple
 shouldShowApple = (\x -> x < 0.125) <$> random
 
-type Result = {snake :: Snake, crashed :: Boolean}
+type Result = {snake :: Snake, crashed :: Boolean, showApple :: ShowApple}
 
-mkLoop :: Eff (canvas :: Canvas) (KeyCode -> Snake -> Eff (canvas :: Canvas) Result)
+mkLoop :: Eff (canvas :: Canvas) (KeyCode -> ShowApple -> Snake -> Eff (canvas :: Canvas, random :: Random) Result)
 mkLoop = do
     canvas <- getCanvasElementById "canvas"
     ctx <- getContext2D canvas
     let board = {w: 800, h: 800, squares: 40}
     return $ loop board ctx
 
-loop :: Board -> Context2D -> KeyCode -> Snake -> Eff (canvas :: Canvas) Result
-loop board ctx keyCode s@(Snake d body) = 
+loop :: Board -> Context2D -> KeyCode -> ShowApple -> Snake -> Eff (canvas :: Canvas, random :: Random) Result
+loop board ctx keyCode showApple s@(Snake d body) = 
     let d' = fromMaybe d (keyToDirection keyCode)
         s' = moveSnake d' s in 
         if isSnakeOutsideBoard board s' 
-        then return $ {snake: s', crashed: true}
+        then return $ {snake: s', crashed: true, showApple: false}
         else do
             _ <- clearRect ctx $ (toView board) (snakeTail s)
             _ <- drawSnake ctx (toView board) s'
-            return $ {snake: s', crashed: false}
+            showApple' <- shouldShowApple
+            return $ {snake: s', crashed: false, showApple: showApple' && not showApple}
