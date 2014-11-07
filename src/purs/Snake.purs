@@ -5,10 +5,13 @@ import Control.Monad.Eff
 import Graphics.Canvas
 import Data.Foldable
 import Data.Array.NonEmpty
+import Data.Maybe
 
 type CanvasEff a = forall e. Eff (canvas :: Canvas | e) a
 
 type Position = {x :: Number, y :: Number}
+
+type KeyCode = Number
 
 showPosition :: Position -> String
 showPosition {x = x, y = y} = "(" ++ (show x) ++ "," ++ (show y) ++ ")"
@@ -37,8 +40,8 @@ starterSnake = Snake S ({x:5,y:5} :| [{x:6,y:5},{x:6,y:6}])
 changeDirection :: Direction -> Snake -> Snake
 changeDirection d' (Snake _ ps) = Snake d' ps
 
-moveSnake :: Snake -> Snake
-moveSnake (Snake d l@(NonEmpty p ps)) = 
+moveSnake :: Direction -> Snake -> Snake
+moveSnake d (Snake _ l@(NonEmpty p ps)) = 
     let p' = case d of 
                 N -> {x:p.x, y:p.y-1}
                 S -> {x:p.x, y:p.y+1}
@@ -52,15 +55,25 @@ toView b p = let sqSize = b.size / b.squares in {h:sqSize, w:sqSize, y:p.y*sqSiz
 drawSnake :: forall e. Context2D -> (Position -> Rectangle) -> Snake -> Eff (canvas :: Canvas | e) Unit
 drawSnake ctx tr (Snake _ ps) = for_ (map tr ps) $ fillRect ctx
 
-mkLoop :: Eff (canvas :: Canvas) (Snake -> Eff (canvas :: Canvas) Snake)
+keyToDirection :: KeyCode -> Maybe Direction
+keyToDirection k = 
+    case k of
+        37 -> Just W
+        39 -> Just E
+        40 -> Just S
+        38 -> Just N
+        _ -> Nothing
+
+mkLoop :: Eff (canvas :: Canvas) (KeyCode -> Snake -> Eff (canvas :: Canvas) Snake)
 mkLoop = do
     canvas <- getCanvasElementById "canvas"
     ctx <- getContext2D canvas
     return $ loop ctx
 
-loop :: Context2D -> Snake -> Eff (canvas :: Canvas) Snake
-loop ctx s = do
+loop :: Context2D -> KeyCode -> Snake -> Eff (canvas :: Canvas) Snake
+loop ctx keyCode s@(Snake d body) = do
     _ <- clearRect ctx $ (toView board) (snakeTail s)
-    let s' = moveSnake s
+    let d' = fromMaybe d (keyToDirection keyCode)
+    let s' = moveSnake d' s
     _ <- drawSnake ctx (toView board) s'
     return s'

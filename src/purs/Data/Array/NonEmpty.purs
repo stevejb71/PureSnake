@@ -1,6 +1,6 @@
 module Data.Array.NonEmpty where
 
-import qualified Data.Array (drop, take, map, filter, nub, concatMap, (!!)) as A
+import qualified Data.Array (append, drop, take, map, filter, nub, concatMap, (!!)) as A
 import qualified Data.Array.Unsafe (last) as AU
 import Data.Foldable (Foldable, foldr, foldl, foldMap)
 import Data.Maybe (Maybe(..))
@@ -27,6 +27,9 @@ instance bindNonEmpty :: Bind NonEmpty where
   (>>=) = flip concatMap
 
 instance monadNonEmpty :: Monad NonEmpty
+
+instance semigroupNonEmpty :: (Semigroup a) => Semigroup (NonEmpty a) where
+  (<>) = append
 
 instance foldableNonEmpty :: Foldable NonEmpty where
   foldr f b as = foldr f b (toArray as)
@@ -89,6 +92,9 @@ infixl 8 !!
 (!!) :: forall a. NonEmpty a -> Number -> Maybe a
 (!!) (NonEmpty a _) 0 = Just a 
 (!!) (NonEmpty _ as) n = A.(!!) as (n-1)
+
+append :: forall a. NonEmpty a -> NonEmpty a -> NonEmpty a
+append (NonEmpty a as) ys = a :| A.append as (toArray ys)
 
 foreign import pop_
   "function pop_(l) {\
