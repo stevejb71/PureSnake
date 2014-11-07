@@ -6,6 +6,8 @@ import Graphics.Canvas
 import Data.Foldable
 import Data.Array.NonEmpty
 import Data.Maybe
+import Control.Monad.Eff.Random
+import Random (randomN)
 
 type CanvasEff a = forall e. Eff (canvas :: Canvas | e) a
 
@@ -69,6 +71,15 @@ keyToDirection k =
         40 -> Just S
         38 -> Just N
         _ -> Nothing
+
+chooseApplePosition :: Number -> forall e. Eff (random :: Random | e) Position
+chooseApplePosition sz = do
+    x <- randomN sz
+    y <- randomN sz
+    return $ {x:x, y:y}
+
+shouldShowApple :: forall e. Eff (random :: Random | e) Boolean
+shouldShowApple = (\x -> x < 0.125) <$> random
 
 type Result = {snake :: Snake, crashed :: Boolean}
 
