@@ -36,7 +36,7 @@ snakeTail :: Snake -> Position
 snakeTail (Snake _ body) = last body
 
 isSnakeOutsideBoard :: Board -> Snake -> Boolean
-isSnakeOutsideBoard b (Snake _ (NonEmpty {x=x,y=y} _)) = x < 0 || y < 0 || x > b.w || y > b.h  
+isSnakeOutsideBoard b (Snake _ (NonEmpty {x=x,y=y} _)) = x < 0 || y < 0 || x >= b.squares || y >= b.squares
 
 starterSnake :: Snake
 starterSnake = Snake S ({x:5,y:5} :| [{x:6,y:5}])
@@ -80,9 +80,12 @@ mkLoop = do
     return $ loop board ctx
 
 loop :: Board -> Context2D -> KeyCode -> Snake -> Eff (canvas :: Canvas) Result
-loop board ctx keyCode s@(Snake d body) = do
-    _ <- clearRect ctx $ (toView board) (snakeTail s)
+loop board ctx keyCode s@(Snake d body) = 
     let d' = fromMaybe d (keyToDirection keyCode)
-    let s' = moveSnake d' s
-    _ <- drawSnake ctx (toView board) s'
-    return $ {snake: s', crashed: (isSnakeOutsideBoard board s)}
+        s' = moveSnake d' s in 
+        if isSnakeOutsideBoard board s' 
+        then return $ {snake: s', crashed: true}
+        else do
+            _ <- clearRect ctx $ (toView board) (snakeTail s)
+            _ <- drawSnake ctx (toView board) s'
+            return $ {snake: s', crashed: false}
