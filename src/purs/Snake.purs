@@ -17,6 +17,11 @@ type Board = {w :: Number, h :: Number, squares :: Number}
 snakeTail :: Snake -> Position
 snakeTail (Snake _ body) = last body
 
+snakeHead :: Snake -> Position
+snakeHead (Snake _ (NonEmpty h _)) = h
+
+direction (Snake d _) = d
+
 isSnakeOutsideBoard :: Board -> Snake -> Boolean
 isSnakeOutsideBoard b (Snake _ (NonEmpty {x=x,y=y} _)) = x < 0 || y < 0 || x >= b.squares || y >= b.squares
 
@@ -60,6 +65,9 @@ nextApplePosition sz = do
             y <- randomN sz
             return {x:x, y:y}
 
+snakeHasEatenApple :: Maybe ApplePosition -> Snake -> Boolean
+snakeHasEatenApple a s = fromMaybe false $ eqPosition <$> a <*> Just (snakeHead s)
+
 type Result = {snake :: Snake, crashed :: Boolean, appleAt :: Maybe ApplePosition}
 
 type Input = {keyCode :: KeyCode, snake :: Snake, appleAt :: Maybe ApplePosition}
@@ -74,8 +82,6 @@ mkLoop = do
 noApple :: Maybe ApplePosition
 noApple = Nothing
 
-direction (Snake d _) = d
-
 loop :: Board -> Context2D -> Input -> Eff (canvas :: Canvas, random :: Random) Result
 loop board ctx input = 
     let s = input.snake
@@ -88,6 +94,8 @@ loop board ctx input =
     else do
         _ <- clearRect ctx $ (toView board) (snakeTail s)
         _ <- drawSnake ctx (toView board) s'
-        applePosition' <- if isNothing applePosition then nextApplePosition board.squares else return applePosition
+        applePosition' <- if isNothing applePosition 
+                          then nextApplePosition board.squares 
+                          else return $ if snakeHasEatenApple applePosition s' then noApple else applePosition
         _ <- if isJust applePosition' && (isNothing applePosition) then drawApple ctx (fromJust applePosition') (toView board) else (return unit)
         return $ {snake: s', crashed: false, appleAt: applePosition'}
