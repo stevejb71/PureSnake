@@ -14,18 +14,18 @@
         $('body').keydown(function(e) {
           global.keyCodes.push(e.keyCode);
         });
-        repeatWithWait(PS.Snake.mkLoop(), PS.Snake.starterSnake, 100, global);
+        var initialParam = {keyCode: -1, appleAt: PS.Snake.noApple, snake: PS.Snake.starterSnake}
+        repeatWithWait(PS.Snake.mkLoop(), initialParam, 100, global);
       });
       function repeatWithWait(f, initialParam, delayMs, global) {
         var call = function() {
-          var result = f(global.keyCodes.pop())(f.showApple)(f.snake)();
-          f.snake = result.snake;
-          f.showApple = result.showApple;
+          var result = f(f.param)();
           if(!result.crashed) {
+            f.param = {keyCode: global.keyCodes.pop(), snake: result.snake, appleAt: result.appleAt};
             window.setTimeout(call, delayMs);
           }
         }
-        f.snake = initialParam;
+        f.param = initialParam;
         call();
       }
     </script>  
