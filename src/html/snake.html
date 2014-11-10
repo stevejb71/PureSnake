@@ -21,7 +21,7 @@
         var call = function() {
           var result = f(f.param)();
           if(!result.crashed) {
-            f.param = {keyCode: global.keyCodes.pop(), snake: result.snake, appleAt: result.appleAt};
+            f.param = {keyCode: global.keyCodes.pop(), snake: result.snake, appleAt: result.appleAt, growSnake: result.snakeHasEatenApple};
             window.setTimeout(call, delayMs);
           }
         }
