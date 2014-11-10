@@ -9,6 +9,7 @@ import Data.Maybe.Unsafe (fromJust)
 import Control.Monad.Eff.Random (Random(), random)
 import Random (randomN)
 import Drawing
+import Data.Array (findIndex)
 
 type KeyCode = Number
 
@@ -69,6 +70,9 @@ nextApplePosition sz = do
 snakeHasEatenApple :: Maybe ApplePosition -> Snake -> Boolean
 snakeHasEatenApple a s = fromMaybe false $ eqPosition <$> a <*> Just (snakeHead s)
 
+snakeHasHitItself :: Snake -> Boolean
+snakeHasHitItself (Snake _ body) = findIndex (\p -> p `eqPosition` (head body)) (tail body) /= -1
+
 type Result = {snake :: Snake, crashed :: Boolean, appleAt :: Maybe ApplePosition, snakeHasEatenApple :: Boolean}
 
 type Input = {keyCode :: KeyCode, snake :: Snake, appleAt :: Maybe ApplePosition, growSnake :: Boolean}
@@ -90,7 +94,7 @@ loop board ctx input =
         applePosition = input.appleAt
         d' = fromMaybe d (keyToDirection input.keyCode)
         s' = moveSnake d' input.growSnake s in 
-    if isSnakeOutsideBoard board s' 
+    if isSnakeOutsideBoard board s' || snakeHasHitItself s'
     then return {snake: s', crashed: true, appleAt: noApple, snakeHasEatenApple: false}
     else do
         let hasEaten = snakeHasEatenApple applePosition s'
