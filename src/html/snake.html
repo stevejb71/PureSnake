@@ -8,8 +8,6 @@
     <script>
       $(document).ready(function(){
         var canvas = document.getElementsByTagName('canvas')[0];
-        canvas.width  = 800;
-        canvas.height = 800;        
         var global = {keyCodes: []};
         $('body').keydown(function(e) {
           global.keyCodes.push(e.keyCode);
@@ -35,7 +33,7 @@
         <h1>Snake</h1>
     </div>
     <div>
-      <canvas id="canvas"/>
+      <canvas id="canvas" width="800" height="800"/>
     </div>
   </body>
 </html>
