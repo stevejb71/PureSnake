@@ -12,14 +12,16 @@
         $('body').keydown(function(e) {
           global.keyCodes.push(e.keyCode);
         });
-        var initialParam = {keyCode: -1, appleAt: PS.Snake.noApple, snake: PS.Snake.starterSnake}
+        var initialParam = {keyCode: -1, appleAt: PS.Snake.noApple, snake: PS.Snake.starterSnake, score: 0}
         repeatWithWait(PS.Snake.mkLoop(), initialParam, 100, global);
       });
       function repeatWithWait(f, initialParam, delayMs, global) {
         var call = function() {
           var result = f(f.param)();
           if(!result.crashed) {
-            f.param = {keyCode: global.keyCodes.pop(), snake: result.snake, appleAt: result.appleAt, growSnake: result.snakeHasEatenApple};
+            f.param = {keyCode: global.keyCodes.pop(), snake: result.snake, appleAt: result.appleAt, growSnake: result.snakeHasEatenApple, score: result.score};
+            var scoreElement = document.getElementById('score');
+            scoreElement.textContent = result.score;
             window.setTimeout(call, delayMs);
           }
         }
@@ -32,6 +34,8 @@
     <div id="title">
         <h1>Snake</h1>
     </div>
+    <div>
+      <div id="scoreTag" style="float:left">Score:</div><div id="score">0</div>
     <div>
       <canvas id="canvas" width="800" height="800"/>
     </div>
