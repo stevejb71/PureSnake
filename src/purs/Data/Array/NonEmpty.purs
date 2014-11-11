@@ -1,6 +1,6 @@
 module Data.Array.NonEmpty where
 
-import qualified Data.Array (append, drop, take, map, filter, nub, concatMap, (!!), length) as A
+import qualified Data.Array (append, drop, take, map, filter, nub, concatMap, (!!), length, reverse) as A
 import qualified Data.Array.Unsafe (last) as AU
 import Data.Foldable (Foldable, foldr, foldl, foldMap)
 import Data.Maybe (Maybe(..))
@@ -99,10 +99,15 @@ infixl 8 !!
 append :: forall a. NonEmpty a -> NonEmpty a -> NonEmpty a
 append (NonEmpty a as) ys = a :| A.append as (toArray ys)
 
+reverse :: forall a. NonEmpty a -> NonEmpty a
+reverse as = fromArray_ $ A.reverse $ toArray as 
+
 foreign import pop_
-  "function pop_(l) {\
-  \  if(l.length == 0) return l;\
-  \  var l1 = l.slice();\
-  \  l1.pop(); \
-  \  return l1;\
-  \}" :: forall a. [a] -> [a]
+  """
+  function pop_(l) {
+    if(l.length == 0) return l;
+    var l1 = l.slice();
+    l1.pop(); 
+    return l1;
+  }
+  """ :: forall a. [a] -> [a]

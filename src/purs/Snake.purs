@@ -21,6 +21,7 @@ snakeTail (Snake _ body) = last body
 snakeHead :: Snake -> Position
 snakeHead (Snake _ (NonEmpty h _)) = h
 
+direction :: Snake -> Direction
 direction (Snake d _) = d
 
 isSnakeOutsideBoard :: Board -> Snake -> Boolean
@@ -30,7 +31,10 @@ starterSnake :: Snake
 starterSnake = Snake S ({x:5,y:5} :| [{x:6,y:5}])
 
 changeDirection :: Direction -> Snake -> Snake
-changeDirection d' (Snake _ ps) = Snake d' ps
+changeDirection d' (Snake d ps) = 
+    if opposite d == d' 
+    then Snake d' (reverse ps)
+    else Snake d' ps
 
 moveSnake :: Direction -> Boolean -> Snake -> Snake
 moveSnake d grow (Snake _ body) = 
