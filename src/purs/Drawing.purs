@@ -14,7 +14,7 @@ black = "rgb(0,0,0)"
 type ApplePosition = Position
 
 drawSnake :: forall e. Context2D -> (Position -> Rectangle) -> Snake -> Eff (canvas :: Canvas | e) Unit
-drawSnake ctx tr (Snake _ ps) = for_ (toArray $ map tr ps) $ fillRectWithStyle ctx black
+drawSnake ctx tr (Snake _ ps) = for_ (map tr ps) $ fillRectWithStyle ctx black
 
 drawApple :: Context2D -> ApplePosition -> (ApplePosition -> Rectangle) -> Eff (canvas :: Canvas, random :: Random) Unit
 drawApple ctx pos tr = fillRectWithStyle ctx red (tr pos)

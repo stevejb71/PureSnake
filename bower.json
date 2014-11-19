@@ -26,6 +26,6 @@
     "purescript-refs": "*",
     "purescript-random": "*",
     "purescript-math": "*",
-    "purescript-nonempty-arrays": "*"
+    "purescript-nonempty-arrays": "0.1.0"
   }
 }
